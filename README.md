@@ -1,4 +1,4 @@
-# 🎙️ xh-voice-server
+# 🎙️ VoxBridge
 
 > 一套开箱即用的 **语音服务中间件**：TTS（文本转语音）＋ ASR（语音转文本）＋ KWS（唤醒词检测），在线离线混合、智能降级、零密钥零成本。
 
@@ -51,7 +51,7 @@ http://localhost:8090/docs
 
 ```
                        ┌───────────────────────────────────────────┐
-     AI 前端 (Vue) ──▶ │            xh-voice-server (Python)        │
+     AI 前端 (Vue) ──▶ │            VoxBridge (Python)             │
                        │               localhost:8090               │
                        │                                           │
      AI 后端 (Java) ──▶│  TTS: edge-tts (在线, 免费 Azure Neural)   │
@@ -306,4 +306,4 @@ xh-voice-server/
 
 ## 📄 协议
 
-[MIT](LICENSE) © 2026 xh-voice-server contributors
+[MIT](LICENSE) © 2026 VoxBridge contributors

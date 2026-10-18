@@ -1,4 +1,4 @@
-# 🎙️ xh-voice-server
+# 🎙️ VoxBridge
 
 > A ready-to-use **voice service middleware**: TTS (text-to-speech) + ASR (speech-to-text) + KWS (wake-word detection). Hybrid online/offline with smart fallback — zero API keys, zero cost.
 
@@ -40,7 +40,7 @@
 ### Windows
 
 ```bat
-cd xh-voice-server
+cd VoxBridge
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
@@ -93,7 +93,7 @@ curl -s http://127.0.0.1:8090/health      # {"status":"ok",...}
 ## 📁 Structure
 
 ```
-xh-voice-server/
+VoxBridge/
 ├── app/
 │   ├── main.py              # FastAPI entry
 │   ├── config.py            # YAML config loader
@@ -125,4 +125,4 @@ Python 3.11+ · FastAPI 0.115.6 · uvicorn 0.34.0 · edge-tts ≥ 7.2.8 · sherp
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 xh-voice-server contributors
+[MIT](LICENSE) © 2026 VoxBridge contributors
