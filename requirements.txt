@@ -1,0 +1,33 @@
+# ============================================================
+# Voice Server - Python Dependencies
+# FastAPI + edge-tts + Sherpa-ONNX
+# ============================================================
+
+# --- Web Framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# --- Online TTS: Microsoft edge-tts ---
+# 注意：7.0.x 及更早版本内置 Chromium 130 版本号会被微软 WSS 端点拒绝(403)，
+# 必须 7.2.8+（Chromium 143+）才能正常合成
+edge-tts>=7.2.8
+
+# --- Offline TTS/ASR/KWS: Sherpa-ONNX ---
+sherpa-onnx==1.11.4
+
+# --- Audio Processing ---
+numpy==1.26.4
+soundfile==0.13.1
+librosa==0.10.2.post1
+
+# --- Configuration ---
+pyyaml==6.0.2
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# --- HTTP Client (health check, fallback) ---
+httpx==0.28.1
+
+# --- Logging ---
+loguru==0.7.3

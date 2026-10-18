@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Server 接口文档 - 前端对接</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #333; line-height: 1.7; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 40px 30px; border-radius: 12px; margin-bottom: 30px; }
+header h1 { font-size: 28px; margin-bottom: 8px; }
+header .subtitle { opacity: 0.9; font-size: 15px; }
+.badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 3px 12px; border-radius: 20px; font-size: 13px; margin-top: 10px; }
+.section { background: #fff; border-radius: 10px; padding: 25px 30px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.section h2 { font-size: 22px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e8e8e8; }
+.section h2 .method { display: inline-block; font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 4px; margin-right: 8px; vertical-align: middle; }
+.method-POST { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.method-GET { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+.method-WS { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+.endpoint { font-family: "Cascadia Code", "Consolas", monospace; font-size: 15px; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; }
+.params-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+.params-table th { background: #f5f5f5; text-align: left; padding: 10px 12px; border: 1px solid #e0e0e0; white-space: nowrap; }
+.params-table td { padding: 10px 12px; border: 1px solid #e0e0e0; vertical-align: top; }
+.params-table .required { color: #e53935; font-weight: bold; }
+.params-table .optional { color: #757575; }
+code, pre { font-family: "Cascadia Code", "Consolas", monospace; }
+pre { background: #282c34; color: #abb2bf; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; margin: 12px 0; }
+pre .key { color: #e06c75; }
+pre .str { color: #98c379; }
+pre .num { color: #d19a66; }
+.note { background: #fffde7; border-left: 4px solid #fbc02d; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+.warn { background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+.tip { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+.code-block { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px; margin: 12px 0; font-family: "Cascadia Code", "Consolas", monospace; font-size: 13px; overflow-x: auto; }
+.summary-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+.summary-card { background: #f5f7fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; text-align: center; }
+.summary-card .num { font-size: 28px; font-weight: 700; color: #667eea; }
+.summary-card .label { font-size: 13px; color: #666; margin-top: 4px; }
+.toc { background: #f5f7fa; border-radius: 8px; padding: 20px 25px; margin-bottom: 30px; }
+.toc h3 { margin-bottom: 12px; font-size: 18px; }
+.toc ul { list-style: none; }
+.toc li { padding: 4px 0; }
+.toc a { color: #667eea; text-decoration: none; font-size: 14px; }
+.toc a:hover { text-decoration: underline; }
+.format-note { font-size: 13px; color: #666; margin-top: 8px; }
+table.format-support { width: 100%; border-collapse: collapse; margin: 10px 0; }
+table.format-support th, table.format-support td { padding: 8px 12px; border: 1px solid #e0e0e0; text-align: center; font-size: 14px; }
+table.format-support th { background: #f5f5f5; }
+.supported { color: #2e7d32; font-weight: bold; }
+.unsupported { color: #c62828; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Voice Server 接口文档</h1>
+  <p class="subtitle">语音服务 API — 供 UniApp H5 前端对接</p>
+  <span class="badge">服务地址: http://192.168.1.197:8090</span>
+  <span class="badge">调试环境</span>
+</header>
+
+<div class="summary-box">
+  <div class="summary-card"><div class="num">10</div><div class="label">接口总数</div></div>
+  <div class="summary-card"><div class="num">4</div><div class="label">TTS 语音合成</div></div>
+  <div class="summary-card"><div class="num">3</div><div class="label">ASR 语音识别</div></div>
+  <div class="summary-card"><div class="num">3</div><div class="label">KWS 唤醒词</div></div>
+</div>
+
+<div class="toc">
+  <h3>目录</h3>
+  <ul>
+    <li><a href="#overview">服务概览 & 音频格式说明</a></li>
+    <li><a href="#tts">TTS 语音合成</a> — <a href="#tts-synthesize-body">POST /tts/synthesize ⭐推荐</a> | <a href="#tts-synthesize">POST /tts</a> | <a href="#tts-voices">GET /tts/voices</a> | <a href="#tts-health">GET /tts/health</a></li>
+    <li><a href="#asr">ASR 语音识别</a> — <a href="#asr-recognize">POST /asr</a> | <a href="#asr-stream">WS /asr/stream</a> | <a href="#asr-health">GET /asr/health</a></li>
+    <li><a href="#kws">KWS 唤醒词检测</a> — <a href="#kws-check">POST /kws/check</a> | <a href="#kws-keywords">GET /kws/keywords</a> | <a href="#kws-stream">WS /kws/stream</a> | <a href="#kws-health">GET /kws/health</a></li>
+    <li><a href="#system">系统接口</a> — <a href="#health">GET /health</a> | <a href="#root">GET /</a></li>
+    <li><a href="#uniapp">UniApp H5 对接示例</a></li>
+  </ul>
+</div>
+
+<!-- ===================== 概览 ===================== -->
+<div class="section" id="overview">
+  <h2>服务概览 & 音频格式说明</h2>
+  
+  <p><strong>服务地址:</strong> <code>http://192.168.1.197:8090</code>（调试期间为本机 IP）</p>
+  <p><strong>CORS:</strong> 已开启 <code>allow_origins: ["*"]</code>，H5 跨域无需额外配置。</p>
+
+  <h3>音频格式兼容性（前端 AAC/MP3/WAV）</h3>
+  <table class="format-support">
+    <tr>
+      <th>接口</th>
+      <th>输入格式</th>
+      <th>输出格式</th>
+      <th>前端兼容说明</th>
+    </tr>
+    <tr>
+      <td>POST /tts（edge-tts 主引擎）</td>
+      <td>—</td>
+      <td class="supported">audio/mpeg (MP3)</td>
+      <td>✅ 前端可直接用 &lt;audio&gt; 播放</td>
+    </tr>
+    <tr>
+      <td>POST /tts（sherpa-onnx 兜底）</td>
+      <td>—</td>
+      <td class="supported">audio/wav (WAV)</td>
+      <td>✅ 前端可直接用 &lt;audio&gt; 播放</td>
+    </tr>
+    <tr>
+      <td>POST /asr</td>
+      <td class="supported">WAV / MP3</td>
+      <td>JSON</td>
+      <td>⚠️ 不支持 AAC，需转 WAV 或 MP3 上传</td>
+    </tr>
+    <tr>
+      <td>WS /asr/stream</td>
+      <td>PCM 16kHz mono</td>
+      <td>JSON</td>
+      <td>非文件格式，需前端 Recorder 采集原始 PCM</td>
+    </tr>
+    <tr>
+      <td>POST /kws/check</td>
+      <td class="supported">WAV</td>
+      <td>JSON</td>
+      <td>⚠️ 不支持 AAC/MP3，仅 WAV</td>
+    </tr>
+    <tr>
+      <td>WS /kws/stream</td>
+      <td>PCM 16kHz mono</td>
+      <td>JSON</td>
+      <td>非文件格式，需前端 Recorder 采集原始 PCM</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>重要提示：</strong>
+    <ul>
+      <li><b>TTS 返回</b>：edge-tts 返回 MP3，sherpa-onnx 返回 WAV。<b>两种都是 audio 流</b>，前端用同一个 Blob 处理即可，通过响应头 <code>X-TTS-Engine</code> 可区分引擎。</li>
+      <li><b>ASR 上传</b>：支持 WAV 和 MP3 文件上传。<b>不支持 AAC</b>，如果前端录制的是 AAC，需在前端转成 WAV 再上传，或改用 WebSocket 流式传输 PCM。</li>
+      <li><b>KWS 上传</b>：仅支持 WAV 文件上传。</li>
+      <li><b>WebSocket 流</b>：ASR 和 KWS 的 stream 接口需要前端发送 <b>16-bit PCM, 16kHz, mono</b> 原始音频帧，不是文件格式。H5 端建议用 <code>RecorderManager</code> 或 <code>getUserMedia + AudioWorklet</code> 采集。</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== TTS ===================== -->
+<div class="section" id="tts">
+  <h2>TTS 语音合成 <span style="font-size:14px;color:#888;font-weight:normal">（Text to Speech）</span></h2>
+  <p>文本转语音。主引擎 edge-tts（微软 Azure 神经网络 TTS，在线免费），兜底引擎 sherpa-onnx Kokoro（离线本地）。</p>
+
+  <div class="tip">
+    <strong>⭐ 推荐使用 <code>POST /tts/synthesize</code>（JSON Body）。</strong><br>
+    长文本（几百字以上）务必用 Body 方式，没有 URL 长度限制；<code>POST /tts</code>（Query String）仅适合短文本或浏览器直接点开播放的场景。两个接口功能完全一致、返回格式完全相同。
+  </div>
+
+  <!-- POST /tts/synthesize (JSON Body - 推荐) -->
+  <h3 id="tts-synthesize-body"><span class="method method-POST">POST</span> <span class="endpoint">/tts/synthesize</span> <span style="font-size:13px;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:4px;">⭐ 推荐</span></h3>
+  <p>文本转语音（<b>JSON Body</b> 传参），返回音频流（MP3 或 WAV）。不受 URL 长度限制，适合长文本。</p>
+
+  <h4>请求头</h4>
+  <table class="params-table">
+    <tr><th>Header</th><th>值</th><th>必填</th></tr>
+    <tr><td><code>Content-Type</code></td><td><code>application/json; charset=utf-8</code></td><td class="required">是</td></tr>
+  </table>
+
+  <h4>请求体（JSON Body）</h4>
+  <table class="params-table">
+    <tr><th>字段</th><th>类型</th><th>必填</th><th>默认值</th><th>说明</th></tr>
+    <tr><td><code>text</code></td><td>string</td><td class="required">是</td><td>—</td><td>要合成的文本，最大 5000 字</td></tr>
+    <tr><td><code>voice</code></td><td>string</td><td class="optional">否</td><td>zh-CN-XiaoxiaoNeural</td><td>发音人，见下方声音列表</td></tr>
+    <tr><td><code>rate</code></td><td>string</td><td class="optional">否</td><td>+0%</td><td>语速，如 <code>+10%</code>（快）、<code>-5%</code>（慢）</td></tr>
+    <tr><td><code>pitch</code></td><td>string</td><td class="optional">否</td><td>+0Hz</td><td>音调，如 <code>+2Hz</code></td></tr>
+    <tr><td><code>volume</code></td><td>string</td><td class="optional">否</td><td>+0%</td><td>音量，如 <code>+20%</code></td></tr>
+    <tr><td><code>fallback</code></td><td>boolean</td><td class="optional">否</td><td>false</td><td><code>true</code> = 跳过 edge-tts，直接用离线引擎</td></tr>
+  </table>
+
+  <h4>请求示例</h4>
+  <pre>{
+  <span class="key">"text"</span>: <span class="str">"你好，欢迎使用语音服务，这是一段比较长的文本……"</span>,
+  <span class="key">"voice"</span>: <span class="str">"zh-CN-XiaoxiaoNeural"</span>,
+  <span class="key">"rate"</span>: <span class="str">"+0%"</span>,
+  <span class="key">"fallback"</span>: <span class="num">false</span>
+}</pre>
+
+  <h4>响应</h4>
+  <table class="params-table">
+    <tr><th>项</th><th>说明</th></tr>
+    <tr><td>Content-Type</td><td><code>audio/mpeg</code>（edge-tts）或 <code>audio/wav</code>（sherpa-onnx）</td></tr>
+    <tr><td>Body</td><td>二进制音频流</td></tr>
+    <tr><td>X-TTS-Engine</td><td>响应头：<code>edge-tts</code> 或 <code>sherpa-onnx</code></td></tr>
+  </table>
+
+  <h4>错误响应</h4>
+  <pre><span style="color:#5c6370">// 422 参数校验失败（text 缺失/为空/超长）</span>
+{<span class="key">"detail"</span>: [{<span class="key">"loc"</span>: [<span class="str">"body"</span>, <span class="str">"text"</span>], <span class="key">"msg"</span>: <span class="str">"Field required"</span>}]}</pre>
+
+  <h4>前端请求示例</h4>
+  <pre><span style="color:#5c6370">// UniApp H5 - TTS（JSON Body，推荐）</span>
+<span style="color:#c678dd">async</span> <span style="color:#61afef">function</span> <span style="color:#61afef">tts</span>(text, voice) {
+  <span style="color:#c678dd">const</span> res = <span style="color:#c678dd">await</span> <span style="color:#e5c07b">fetch</span>(<span style="color:#98c379">'http://192.168.1.197:8090/tts/synthesize'</span>, {
+    method: <span style="color:#98c379">'POST'</span>,
+    headers: { <span style="color:#98c379">'Content-Type'</span>: <span style="color:#98c379">'application/json; charset=utf-8'</span> },
+    body: <span class="builtin">JSON</span>.stringify({
+      text: text,                  <span style="color:#5c6370">// 长文本无压力</span>
+      voice: voice || <span style="color:#98c379">'zh-CN-XiaoxiaoNeural'</span>,
+      rate: <span style="color:#98c379">'+0%'</span>,
+      fallback: <span style="color:#c678dd">false</span>
+    })
+  });
+  <span style="color:#c678dd">if</span> (!res.ok) <span style="color:#c678dd">throw</span> <span style="color:#c678dd">new</span> <span class="type">Error</span>(<span style="color:#98c379">'TTS 失败: '</span> + res.status);
+  <span style="color:#c678dd">const</span> blob = <span style="color:#c678dd">await</span> res.blob();
+  <span style="color:#c678dd">const</span> engine = res.headers.get(<span style="color:#98c379">'X-TTS-Engine'</span>);
+  <span style="color:#c678dd">return</span> {
+    url: <span class="builtin">URL</span>.createObjectURL(blob),
+    engine: engine,              <span style="color:#5c6370">// edge-tts / sherpa-onnx</span>
+    format: engine === <span style="color:#98c379">'edge-tts'</span> ? <span style="color:#98c379">'mp3'</span> : <span style="color:#98c379">'wav'</span>
+  };
+}</pre>
+
+  <!-- POST /tts (Query String) -->
+  <h3 id="tts-synthesize"><span class="method method-POST">POST</span> <span class="endpoint">/tts</span> <span style="font-size:13px;color:#888;">（Query String，短文本/浏览器直连）</span></h3>
+  <p>文本转语音，<b>参数通过 Query String 传递</b>，返回音频流（MP3 或 WAV）。适合短文本或直接拼 URL 用 &lt;audio&gt; 播放。</p>
+
+  <h4>请求参数（Query String）</h4>
+  <table class="params-table">
+    <tr><th>参数</th><th>类型</th><th>必填</th><th>默认值</th><th>说明</th></tr>
+    <tr><td><code>text</code></td><td>string</td><td class="required">是</td><td>—</td><td>要合成的文本，最大 5000 字</td></tr>
+    <tr><td><code>voice</code></td><td>string</td><td class="optional">否</td><td>zh-CN-XiaoxiaoNeural</td><td>发音人，见下方声音列表</td></tr>
+    <tr><td><code>rate</code></td><td>string</td><td class="optional">否</td><td>+0%</td><td>语速，如 <code>+10%</code>（加快）、<code>-5%</code>（减慢）</td></tr>
+    <tr><td><code>pitch</code></td><td>string</td><td class="optional">否</td><td>+0Hz</td><td>音调，如 <code>+2Hz</code>（升高）、<code>-1Hz</code>（降低）</td></tr>
+    <tr><td><code>volume</code></td><td>string</td><td class="optional">否</td><td>+0%</td><td>音量，如 <code>+20%</code>（增大）、<code>-10%</code>（减小）</td></tr>
+    <tr><td><code>fallback</code></td><td>boolean</td><td class="optional">否</td><td>false</td><td><code>true</code> = 跳过 edge-tts，直接用离线引擎</td></tr>
+  </table>
+
+  <div class="warn">
+    <strong>注意：</strong>参数通过 <b>Query String</b> 传递（不是 Body），因为文本可能含特殊字符，前端需用 <code>encodeURIComponent</code> 编码。
+  </div>
+
+  <h4>响应</h4>
+  <table class="params-table">
+    <tr><th>项</th><th>说明</th></tr>
+    <tr><td>Content-Type</td><td><code>audio/mpeg</code>（edge-tts）或 <code>audio/wav</code>（sherpa-onnx）</td></tr>
+    <tr><td>Body</td><td>二进制音频流</td></tr>
+    <tr><td>X-TTS-Engine</td><td>响应头：<code>edge-tts</code> 或 <code>sherpa-onnx</code></td></tr>
+    <tr><td>X-TTS-Voice</td><td>响应头：使用的发音人（仅 edge-tts）</td></tr>
+  </table>
+
+  <h4>发音人列表（中文）</h4>
+  <table class="params-table">
+    <tr><th>voice 值</th><th>性别</th><th>风格</th></tr>
+    <tr><td><code>zh-CN-XiaoxiaoNeural</code></td><td>女</td><td>自然亲切（默认）</td></tr>
+    <tr><td><code>zh-CN-YunxiNeural</code></td><td>男</td><td>沉稳</td></tr>
+    <tr><td><code>zh-CN-XiaoyiNeural</code></td><td>女</td><td>活泼</td></tr>
+    <tr><td><code>zh-CN-YunjianNeural</code></td><td>男</td><td>运动风格</td></tr>
+    <tr><td><code>zh-CN-YunyangNeural</code></td><td>男</td><td>专业播报</td></tr>
+    <tr><td><code>zh-CN-liaoning-XiaobeiNeural</code></td><td>女</td><td>辽宁方言</td></tr>
+    <tr><td><code>zh-CN-shaanxi-XiaomaoNeural</code></td><td>女</td><td>陕西方言</td></tr>
+  </table>
+
+  <h4>前端请求示例</h4>
+  <pre><span style="color:#5c6370">// UniApp H5 - TTS 合成并播放</span>
+<span style="color:#c678dd">const</span> text = <span style="color:#98c379">'你好，欢迎使用语音服务'</span>;
+<span style="color:#c678dd">const</span> url = <span style="color:#98c379">`http://192.168.1.197:8090/tts?text=</span><span style="color:#61afef">${</span><span style="color:#e5c07b">encodeURIComponent</span>(text)<span style="color:#61afef">}</span><span style="color:#98c379">&amp;voice=zh-CN-XiaoxiaoNeural`</span>;
+
+<span style="color:#5c6370">// 方式1：直接用 audio 标签播放</span>
+<span style="color:#c678dd">const</span> audio = <span style="color:#e5c07b">document</span>.getElementById(<span style="color:#98c379">'myAudio'</span>);
+audio.src = url;
+audio.play();
+
+<span style="color:#5c6370">// 方式2：fetch 获取 Blob 后播放</span>
+<span style="color:#c678dd">const</span> res = <span style="color:#c678dd">await</span> <span style="color:#e5c07b">fetch</span>(url);
+<span style="color:#c678dd">const</span> blob = <span style="color:#c678dd">await</span> res.blob();
+<span style="color:#c678dd">const</span> audioUrl = <span style="color:#61afef">URL</span>.createObjectURL(blob);
+<span style="color:#c678dd">const</span> engine = res.headers.get(<span style="color:#98c379">'X-TTS-Engine'</span>); <span style="color:#5c6370">// "edge-tts" 或 "sherpa-onnx"</span>
+<span style="color:#e5c07b">console</span>.log(<span style="color:#98c379">'TTS 引擎:'</span>, engine);
+
+audio.src = audioUrl;
+audio.play();</pre>
+
+  <!-- GET /tts/voices -->
+  <h3 id="tts-voices"><span class="method method-GET">GET</span> <span class="endpoint">/tts/voices</span></h3>
+  <p>获取所有可用的中文发音人列表。</p>
+  <h4>响应示例</h4>
+  <pre>{
+  <span class="key">"count"</span>: 7,
+  <span class="key">"voices"</span>: [
+    {
+      <span class="key">"name"</span>: <span class="str">"zh-CN-XiaoxiaoNeural"</span>,
+      <span class="key">"gender"</span>: <span class="str">"Female"</span>,
+      <span class="key">"locale"</span>: <span class="str">"zh-CN"</span>,
+      <span class="key">"voice_id"</span>: <span class="str">"zh-CN-XiaoxiaoNeural"</span>
+    }
+  ]
+}</pre>
+
+  <!-- GET /tts/health -->
+  <h3 id="tts-health"><span class="method method-GET">GET</span> <span class="endpoint">/tts/health</span></h3>
+  <p>检查 TTS 引擎可用性。</p>
+  <pre>{
+  <span class="key">"edge_tts"</span>: <span class="num">true</span>,
+  <span class="key">"sherpa_tts"</span>: <span class="num">true</span>,
+  <span class="key">"primary"</span>: <span class="str">"edge_tts"</span>,
+  <span class="key">"fallback"</span>: <span class="str">"sherpa_tts"</span>
+}</pre>
+</div>
+
+<!-- ===================== ASR ===================== -->
+<div class="section" id="asr">
+  <h2>ASR 语音识别 <span style="font-size:14px;color:#888;font-weight:normal">（Automatic Speech Recognition）</span></h2>
+  <p>语音转文字。使用 Sherpa-ONNX Streaming Zipformer 中英双语模型（离线本地推理）。</p>
+
+  <!-- POST /asr -->
+  <h3 id="asr-recognize"><span class="method method-POST">POST</span> <span class="endpoint">/asr</span></h3>
+  <p>上传音频文件，返回识别文本。<b>支持 WAV 和 MP3 格式，不支持 AAC。</b></p>
+
+  <h4>请求参数</h4>
+  <table class="params-table">
+    <tr><th>参数</th><th>位置</th><th>类型</th><th>必填</th><th>说明</th></tr>
+    <tr><td><code>audio</code></td><td>FormData (file)</td><td>binary</td><td class="required">是</td><td>音频文件，WAV 或 MP3 格式</td></tr>
+  </table>
+
+  <h4>响应示例</h4>
+  <pre>{
+  <span class="key">"text"</span>: <span class="str">"你好欢迎使用语音服务"</span>,
+  <span class="key">"confidence"</span>: <span class="num">0.0</span>,
+  <span class="key">"duration_ms"</span>: <span class="num">3200</span>,
+  <span class="key">"engine"</span>: <span class="str">"sherpa-onnx-streaming-zipformer-bilingual"</span>
+}</pre>
+
+  <h4>前端请求示例</h4>
+  <pre><span style="color:#5c6370">// UniApp H5 - ASR 文件上传识别</span>
+<span style="color:#5c6370">// 前端录制得到 wav 文件后上传</span>
+
+<span style="color:#c678dd">const</span> formData = <span style="color:#c678dd">new</span> <span class="type">FormData</span>();
+formData.append(<span style="color:#98c379">'audio'</span>, wavBlob, <span style="color:#98c379">'recording.wav'</span>);
+
+<span style="color:#c678dd">const</span> res = <span style="color:#c678dd">await</span> <span class="type">fetch</span>(<span style="color:#98c379">'http://192.168.1.197:8090/asr'</span>, {
+  method: <span style="color:#98c379">'POST'</span>,
+  body: formData
+});
+
+<span style="color:#c678dd">const</span> result = <span style="color:#c678dd">await</span> res.json();
+<span class="builtin">console</span>.log(<span style="color:#98c379">'识别结果:'</span>, result.text);
+
+<span style="color:#5c6370">// uniapp 也可以用 uni.uploadFile</span>
+<span style="color:#5c6370">// uni.uploadFile({
+//   url: 'http://192.168.1.197:8090/asr',
+//   filePath: tempFilePath,  // 录音临时路径
+//   name: 'audio',
+//   success: (res) => {
+//     const data = JSON.parse(res.data);
+//     console.log('识别结果:', data.text);
+//   }
+// });</span></pre>
+
+  <div class="warn">
+    <strong>AAC 格式不支持：</strong>POST /asr 只接受 WAV 和 MP3。如果前端用 <code>uni.getRecorderManager()</code> 录制，默认格式可能是 aac，需在 start 时指定 <code>format: 'wav'</code> 或 <code>format: 'mp3'</code>。
+  </div>
+
+  <!-- WS /asr/stream -->
+  <h3 id="asr-stream"><span class="method method-WS">WS</span> <span class="endpoint">/asr/stream</span></h3>
+  <p>实时流式语音识别（WebSocket）。边说边识别，返回中间结果和最终结果。</p>
+
+  <h4>通信协议</h4>
+  <table class="params-table">
+    <tr><th>方向</th><th>消息格式</th><th>说明</th></tr>
+    <tr><td>客户端 → 服务端</td><td>二进制 (Binary)</td><td>16-bit PCM 音频帧，16kHz，mono，小端</td></tr>
+    <tr><td>客户端 → 服务端</td><td>JSON Text</td><td><code>{"action": "stop"}</code> 结束会话</td></tr>
+    <tr><td>服务端 → 客户端</td><td>JSON Text</td><td>识别结果（见下方）</td></tr>
+  </table>
+
+  <h4>服务端返回消息</h4>
+  <pre><span style="color:#5c6370">// 中间结果（实时显示）</span>
+{<span class="key">"text"</span>: <span class="str">"你好"</span>, <span class="key">"is_final"</span>: <span class="num">false</span>, <span class="key">"reason"</span>: <span class="str">"partial"</span>}
+
+<span style="color:#5c6370">// 最终结果（句尾静音检测到端点）</span>
+{<span class="key">"text"</span>: <span class="str">"你好欢迎使用"</span>, <span class="key">"is_final"</span>: <span class="num">true</span>, <span class="key">"reason"</span>: <span class="str">"endpoint"</span>}
+
+<span style="color:#5c6370">// 用户主动停止</span>
+{<span class="key">"text"</span>: <span class="str">"最终文本"</span>, <span class="key">"is_final"</span>: <span class="num">true</span>, <span class="key">"reason"</span>: <span class="str">"user_stop"</span>}</pre>
+
+  <div class="note">
+    <strong>音频格式要求：</strong>WebSocket 推送的音频必须是 <b>16-bit signed PCM, 16kHz, mono, little-endian</b>。这不是 WAV 文件（没有文件头），是裸 PCM 数据。前端需要用 AudioWorklet 或 Web Audio API 采集原始 PCM 帧。
+  </div>
+
+  <!-- GET /asr/health -->
+  <h3 id="asr-health"><span class="method method-GET">GET</span> <span class="endpoint">/asr/health</span></h3>
+  <pre>{
+  <span class="key">"sherpa_asr"</span>: <span class="num">true</span>,
+  <span class="key">"vad"</span>: <span class="num">true</span>,
+  <span class="key">"model"</span>: <span class="str">"streaming-zipformer-bilingual-zh-en-2023-02-20"</span>
+}</pre>
+</div>
+
+<!-- ===================== KWS ===================== -->
+<div class="section" id="kws">
+  <h2>KWS 唤醒词检测 <span style="font-size:14px;color:#888;font-weight:normal">（Keyword Spotting / Wake Word Detection）</span></h2>
+  <p>语音唤醒词检测。使用 Sherpa-ONNX Zipformer KWS 3.3MB 模型（离线本地推理）。</p>
+
+  <h4>内置唤醒词</h4>
+  <table class="params-table">
+    <tr><th>唤醒词</th><th>拼音</th><th>用途</th></tr>
+    <tr><td>你好小智</td><td>nǐ hǎo xiǎo zhì</td><td>主唤醒词</td></tr>
+    <tr><td>小智同学</td><td>xiǎo zhì tóng xué</td><td>备选唤醒词</td></tr>
+    <tr><td>唤醒小智</td><td>huàn xǐng xiǎo zhì</td><td>备选唤醒词</td></tr>
+    <tr><td>开始录音</td><td>kāi shǐ lù yīn</td><td>语音命令</td></tr>
+    <tr><td>停止录音</td><td>tíng zhǐ lù yīn</td><td>语音命令</td></tr>
+  </table>
+
+  <!-- POST /kws/check -->
+  <h3 id="kws-check"><span class="method method-POST">POST</span> <span class="endpoint">/kws/check</span></h3>
+  <p>上传 WAV 音频文件，检测是否包含唤醒词。<b>仅支持 WAV 格式。</b></p>
+
+  <h4>请求参数</h4>
+  <table class="params-table">
+    <tr><th>参数</th><th>位置</th><th>类型</th><th>必填</th><th>说明</th></tr>
+    <tr><td><code>audio</code></td><td>FormData (file)</td><td>binary</td><td class="required">是</td><td>WAV 音频文件</td></tr>
+  </table>
+
+  <h4>响应示例</h4>
+  <pre><span style="color:#5c6370">// 检测到唤醒词</span>
+{
+  <span class="key">"detected"</span>: <span class="num">true</span>,
+  <span class="key">"keyword"</span>: <span class="str">"你好小智"</span>,
+  <span class="key">"keyword_index"</span>: <span class="num">0</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1234567890.0</span>
+}
+
+<span style="color:#5c6370">// 未检测到</span>
+{
+  <span class="key">"detected"</span>: <span class="num">false</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1234567890.0</span>
+}</pre>
+
+  <!-- GET /kws/keywords -->
+  <h3 id="kws-keywords"><span class="method method-GET">GET</span> <span class="endpoint">/kws/keywords</span></h3>
+  <p>获取当前配置的唤醒词列表。</p>
+  <pre>{
+  <span class="key">"count"</span>: <span class="num">5</span>,
+  <span class="key">"keywords"</span>: [<span class="str">"你好小智"</span>, <span class="str">"小智同学"</span>, <span class="str">"唤醒小智"</span>, <span class="str">"开始录音"</span>, <span class="str">"停止录音"</span>]
+}</pre>
+
+  <!-- WS /kws/stream -->
+  <h3 id="kws-stream"><span class="method method-WS">WS</span> <span class="endpoint">/kws/stream</span></h3>
+  <p>实时流式唤醒词检测（WebSocket）。持续监听音频流，检测到唤醒词时推送消息。</p>
+
+  <h4>通信协议</h4>
+  <table class="params-table">
+    <tr><th>方向</th><th>消息格式</th><th>说明</th></tr>
+    <tr><td>客户端 → 服务端</td><td>二进制 (Binary)</td><td>16-bit PCM 音频帧，16kHz，mono，小端</td></tr>
+    <tr><td>客户端 → 服务端</td><td>JSON Text</td><td><code>{"action": "stop"}</code> 结束 | <code>{"action": "reset"}</code> 重置检测流</td></tr>
+    <tr><td>服务端 → 客户端</td><td>JSON Text</td><td>检测结果（见下方）</td></tr>
+  </table>
+
+  <h4>服务端返回消息</h4>
+  <pre><span style="color:#5c6370">// 检测到唤醒词</span>
+{<span class="key">"detected"</span>: <span class="num">true</span>, <span class="key">"keyword"</span>: <span class="str">"你好小智"</span>, <span class="key">"timestamp"</span>: <span class="num">1234567890.0</span>}
+
+<span style="color:#5c6370">// 心跳（未检测到）</span>
+{<span class="key">"detected"</span>: <span class="num">false</span>, <span class="key">"timestamp"</span>: <span class="num">1234567890.0</span>}</pre>
+
+  <!-- GET /kws/health -->
+  <h3 id="kws-health"><span class="method method-GET">GET</span> <span class="endpoint">/kws/health</span></h3>
+  <pre>{
+  <span class="key">"sherpa_kws"</span>: <span class="num">true</span>,
+  <span class="key">"model"</span>: <span class="str">"zipformer-kws-wenetspeech-3.3M-2024-01-01"</span>,
+  <span class="key">"keywords"</span>: [<span class="str">"你好小智"</span>, <span class="str">"小智同学"</span>, <span class="str">"唤醒小智"</span>, <span class="str">"开始录音"</span>, <span class="str">"停止录音"</span>]
+}</pre>
+</div>
+
+<!-- ===================== System ===================== -->
+<div class="section" id="system">
+  <h2>系统接口</h2>
+
+  <h3 id="health"><span class="method method-GET">GET</span> <span class="endpoint">/health</span></h3>
+  <p>整体健康检查，返回所有引擎状态。</p>
+  <pre>{
+  <span class="key">"status"</span>: <span class="str">"ok"</span>,
+  <span class="key">"timestamp"</span>: <span class="num">1234567890.0</span>,
+  <span class="key">"engines"</span>: {
+    <span class="key">"edge_tts"</span>: <span class="num">true</span>,
+    <span class="key">"sherpa_tts"</span>: <span class="num">true</span>,
+    <span class="key">"sherpa_asr"</span>: <span class="num">true</span>,
+    <span class="key">"sherpa_kws"</span>: <span class="num">true</span>,
+    <span class="key">"vad"</span>: <span class="num">true</span>
+  }
+}</pre>
+
+  <h3 id="root"><span class="method method-GET">GET</span> <span class="endpoint">/</span></h3>
+  <p>API 信息概览，包含所有接口地址和模型状态。</p>
+</div>
+
+<!-- ===================== UniApp 示例 ===================== -->
+<div class="section" id="uniapp">
+  <h2>UniApp H5 对接示例</h2>
+
+  <h3>1. 封装 API 模块</h3>
+  <pre><span style="color:#5c6370">// utils/voiceApi.js</span>
+<span style="color:#c678dd">const</span> BASE_URL = <span style="color:#98c379">'http://192.168.1.197:8090'</span>;
+
+<span style="color:#5c6370">// TTS：文本转语音（JSON Body，长文本推荐），返回音频 URL</span>
+<span style="color:#c678dd">export</span> <span style="color:#c678dd">async</span> <span style="color:#61afef">function</span> <span style="color:#61afef">tts</span>(text, voice, rate, pitch, volume) {
+  <span style="color:#c678dd">const</span> res = <span style="color:#c678dd">await</span> <span class="type">fetch</span>(<span style="color:#98c379">`${BASE_URL}/tts/synthesize`</span>, {
+    method: <span style="color:#98c379">'POST'</span>,
+    headers: { <span style="color:#98c379">'Content-Type'</span>: <span style="color:#98c379">'application/json; charset=utf-8'</span> },
+    body: <span class="builtin">JSON</span>.stringify({
+      text: text,
+      voice: voice || <span style="color:#98c379">'zh-CN-XiaoxiaoNeural'</span>,
+      rate: rate || <span style="color:#98c379">'+0%'</span>,
+      pitch: pitch,
+      volume: volume,
+      fallback: <span style="color:#c678dd">false</span>
+    })
+  });
+  <span style="color:#c678dd">if</span> (!res.ok) <span style="color:#c678dd">throw</span> <span style="color:#c678dd">new</span> <span class="type">Error</span>(<span style="color:#98c379">'TTS 失败: '</span> + res.status);
+
+  <span style="color:#c678dd">const</span> blob = <span style="color:#c678dd">await</span> res.blob();
+  <span style="color:#c678dd">const</span> engine = res.headers.get(<span style="color:#98c379">'X-TTS-Engine'</span>);
+  <span style="color:#c678dd">return</span> {
+    url: <span class="builtin">URL</span>.createObjectURL(blob),
+    engine: engine,
+    <span style="color:#5c6370">// edge-tts 返回 mp3，sherpa-onnx 返回 wav</span>
+    format: engine === <span style="color:#98c379">'edge-tts'</span> ? <span style="color:#98c379">'mp3'</span> : <span style="color:#98c379">'wav'</span>
+  };
+}
+
+<span style="color:#5c6370">// ASR：音频文件转文字</span>
+<span style="color:#c678dd">export</span> <span style="color:#c678dd">async</span> <span style="color:#61afef">function</span> <span style="color:#61afef">asrRecognize</span>(audioFilePath) {
+  <span style="color:#c678dd">return</span> <span style="color:#c678dd">new</span> <span class="type">Promise</span>((resolve, reject) => {
+    <span class="builtin">uni</span>.uploadFile({
+      url: <span style="color:#98c379">`${BASE_URL}/asr`</span>,
+      filePath: audioFilePath,
+      name: <span style="color:#98c379">'audio'</span>,
+      success: (res) => {
+        <span style="color:#c678dd">const</span> data = <span class="builtin">JSON</span>.parse(res.data);
+        resolve(data);
+      },
+      fail: reject
+    });
+  });
+}
+
+<span style="color:#5c6370">// ASR 流式识别（WebSocket）</span>
+<span style="color:#c678dd">export</span> <span style="color:#61afef">function</span> <span style="color:#61afef">asrStream</span>(onResult, onClose) {
+  <span style="color:#c678dd">const</span> ws = <span style="color:#c678dd">new</span> <span class="type">WebSocket</span>(<span style="color:#98c379">'ws://192.168.1.197:8090/asr/stream'</span>);
+  ws.onmessage = (e) => {
+    <span style="color:#c678dd">const</span> data = <span class="builtin">JSON</span>.parse(e.data);
+    onResult(data);
+  };
+  ws.onclose = onClose;
+  <span style="color:#c678dd">return</span> ws;
+}
+
+<span style="color:#5c6370">// KWS 流式唤醒词检测（WebSocket）</span>
+<span style="color:#c678dd">export</span> <span style="color:#61afef">function</span> <span style="color:#61afef">kwsStream</span>(onResult, onClose) {
+  <span style="color:#c678dd">const</span> ws = <span style="color:#c678dd">new</span> <span class="type">WebSocket</span>(<span style="color:#98c379">'ws://192.168.1.197:8090/kws/stream'</span>);
+  ws.onmessage = (e) => {
+    <span style="color:#c678dd">const</span> data = <span class="builtin">JSON</span>.parse(e.data);
+    <span style="color:#c678dd">if</span> (data.detected) {
+      onResult(data);
+    }
+  };
+  ws.onclose = onClose;
+  <span style="color:#c678dd">return</span> ws;
+}</pre>
+
+  <h3>2. 页面中使用 TTS</h3>
+  <pre><span style="color:#61afef">&lt;template&gt;</span>
+  <span style="color:#e06c75">&lt;view&gt;</span>
+    <span style="color:#e06c75">&lt;input</span> v-model=<span style="color:#98c379">"text"</span> placeholder=<span style="color:#98c379">"输入要朗读的文字"</span> <span style="color:#e06c75">/&gt;</span>
+    <span style="color:#e06c75">&lt;button</span> @click=<span style="color:#98c379">"speak"</span><span style="color:#e06c75">&gt;语音播放&lt;/button&gt;</span>
+    <span style="color:#e06c75">&lt;audio</span> ref=<span style="color:#98c379">"audio"</span> <span style="color:#e06c75">&gt;&lt;/audio&gt;</span>
+  <span style="color:#e06c75">&lt;/view&gt;</span>
+<span style="color:#61afef">&lt;/template&gt;</span>
+
+<span style="color:#61afef">&lt;script&gt;</span>
+<span style="color:#c678dd">import</span> { tts } <span style="color:#c678dd">from</span> <span style="color:#98c379">'@/utils/voiceApi.js'</span>;
+
+<span style="color:#c678dd">export</span> <span style="color:#c678dd">default</span> {
+  data() {
+    <span style="color:#c678dd">return</span> { text: <span style="color:#98c379">'你好世界'</span> };
+  },
+  methods: {
+    <span style="color:#c678dd">async</span> speak() {
+      <span style="color:#c678dd">try</span> {
+        <span style="color:#c678dd">const</span> { url, engine } = <span style="color:#c678dd">await</span> tts(<span style="color:#c678dd">this</span>.text, <span style="color:#98c379">'zh-CN-XiaoxiaoNeural'</span>);
+        <span style="color:#c678dd">this</span>.$refs.audio.src = url;
+        <span style="color:#c678dd">await</span> <span style="color:#c678dd">this</span>.$refs.audio.play();
+        <span class="builtin">console</span>.log(<span style="color:#98c379">'播放完成，引擎:'</span>, engine);
+      } <span style="color:#c678dd">catch</span> (e) {
+        <span class="builtin">uni</span>.showToast({ title: <span style="color:#98c379">'语音合成失败'</span>, icon: <span style="color:#98c379">'none'</span> });
+      }
+    }
+  }
+}
+<span style="color:#61afef">&lt;/script&gt;</span></pre>
+
+  <h3>3. 录音 + ASR 识别</h3>
+  <pre><span style="color:#61afef">&lt;template&gt;</span>
+  <span style="color:#e06c75">&lt;view&gt;</span>
+    <span style="color:#e06c75">&lt;button</span> @touchstart=<span style="color:#98c379">"startRecord"</span> @touchend=<span style="color:#98c379">"stopRecord"</span><span style="color:#e06c75">&gt;按住说话&lt;/button&gt;</span>
+    <span style="color:#e06c75">&lt;text&gt;</span>{{ result }}<span style="color:#e06c75">&lt;/text&gt;</span>
+  <span style="color:#e06c75">&lt;/view&gt;</span>
+<span style="color:#61afef">&lt;/template&gt;</span>
+
+<span style="color:#61afef">&lt;script&gt;</span>
+<span style="color:#c678dd">import</span> { asrRecognize } <span style="color:#c678dd">from</span> <span style="color:#98c379">'@/utils/voiceApi.js'</span>;
+
+<span style="color:#c678dd">const</span> recorder = <span class="builtin">uni</span>.getRecorderManager();
+
+<span style="color:#c678dd">export</span> <span style="color:#c678dd">default</span> {
+  data() {
+    <span style="color:#c678dd">return</span> { result: <span style="color:#98c379">''</span> };
+  },
+  onLoad() {
+    recorder.onStop(<span style="color:#c678dd">async</span> (res) => {
+      <span style="color:#c678dd">try</span> {
+        <span style="color:#5c6370">// res.tempFilePath 是录音文件路径</span>
+        <span style="color:#c678dd">const</span> data = <span style="color:#c678dd">await</span> asrRecognize(res.tempFilePath);
+        <span style="color:#c678dd">this</span>.result = data.text;
+      } <span style="color:#c678dd">catch</span> (e) {
+        <span class="builtin">uni</span>.showToast({ title: <span style="color:#98c379">'识别失败'</span>, icon: <span style="color:#98c379">'none'</span> });
+      }
+    });
+  },
+  methods: {
+    startRecord() {
+      recorder.start({
+        format: <span style="color:#98c379">'wav'</span>,      <span style="color:#5c6370">// 必须用 wav 或 mp3，不能用 aac</span>
+        sampleRate: <span style="color:#d19a66">16000</span>,
+        numberOfChannels: <span style="color:#d19a66">1</span>,
+      });
+    },
+    stopRecord() {
+      recorder.stop();
+    }
+  }
+}
+<span style="color:#61afef">&lt;/script&gt;</span></pre>
+
+  <div class="tip">
+    <strong>录音格式关键：</strong><code>uni.getRecorderManager().start({ format: 'wav' })</code> 必须指定 <code>format: 'wav'</code>，默认可能是 aac，POST /asr 不支持 aac。
+  </div>
+
+</div>
+
+<!-- ===================== 问题汇总 ===================== -->
+<div class="section">
+  <h2>代码检查发现的问题</h2>
+
+  <div class="warn">
+    <strong>1. ASR POST /asr 不支持 AAC 格式</strong><br>
+    当前用 <code>librosa.load()</code> 读取文件，librosa 依赖 <code>sndfile</code> 库，sndfile 支持 WAV/MP3/FLAC/OGG，但<b>不支持 AAC</b>。
+    如果前端强制需要 AAC 上传，后端需加 <code>ffmpeg</code> 转码环节（需安装 ffmpeg）。
+    <b>建议方案：</b>前端录音时指定 <code>format: 'wav'</code> 或 <code>format: 'mp3'</code>，不传 AAC。
+  </div>
+
+  <div class="tip">
+    <strong>2. ✅ TTS 长文本已支持 Body 传参</strong><br>
+    已新增 <code>POST /tts/synthesize</code>（JSON Body），参数走请求体不受 URL 长度限制，支持到 5000 字。<br>
+    <b>原 <code>POST /tts</code>（Query String）保留</b>，适合短文本或浏览器直接拼 URL 播放；长文本请用 Body 接口。
+  </div>
+
+  <div class="warn">
+    <strong>3. WebSocket 音频格式不是文件格式</strong><br>
+    <code>/asr/stream</code> 和 <code>/kws/stream</code> 要求客户端推送<b>裸 PCM 数据</b>（16-bit, 16kHz, mono, 小端）。
+    这不能直接用录音文件上传。H5 端需要用 <code>getUserMedia + AudioWorklet</code> 采集 PCM 帧。
+    UniApp 的 <code>RecorderManager</code> 产出的是文件格式（WAV/MP3），不能直接用于 WebSocket 流。
+    <b>建议方案：</b>实时流式用原生 H5 API；批量识别用 POST /asr 文件上传。
+  </div>
+
+  <div class="note">
+    <strong>4. KWS POST /kws/check 仅支持 WAV</strong><br>
+    和 ASR 不同，KWS 的文件上传接口只支持 WAV（代码用 <code>librosa.load</code> 但后缀依赖文件名扩展名判断）。
+    MP3 也能被 librosa 读取，但建议统一用 WAV。
+  </div>
+
+  <div class="note">
+    <strong>5. 无鉴权</strong><br>
+    当前服务未开启任何鉴权，CORS <code>allow_origins: ["*"]</code>。
+    调试阶段无问题，生产环境需加 API Key 或走网关鉴权。
+  </div>
+</div>
+
+</div>
+</body>
+</html>

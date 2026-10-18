@@ -1,0 +1,99 @@
+# ============================================================
+# Voice Server Configuration
+# ============================================================
+
+server:
+  host: "0.0.0.0"
+  port: 8090
+  workers: 1
+  log_level: "info"
+
+# --- Online TTS: edge-tts (Microsoft Azure Neural TTS, free) ---
+edge_tts:
+  enabled: true
+  default_voice: "zh-CN-XiaoxiaoNeural"
+  default_rate: "+0%"
+  default_pitch: "+0Hz"
+  default_volume: "+0%"
+  timeout: 10          # seconds
+  # Voice options:
+  #   zh-CN-XiaoxiaoNeural  (女声, 晓晓, 自然亲切)
+  #   zh-CN-YunxiNeural     (男声, 云希, 沉稳)
+  #   zh-CN-XiaoyiNeural    (女声, 晓伊, 活泼)
+  #   zh-CN-YunjianNeural   (男声, 云健, 运动)
+  #   zh-CN-YunyangNeural   (男声, 云扬, 专业播报)
+  #   zh-CN-liaoning-XiaobeiNeural  (辽宁方言)
+  #   zh-CN-shaanxi-XiaomaoNeural   (陕西方言)
+
+# --- Offline TTS: Sherpa-ONNX Kokoro ---
+sherpa_tts:
+  enabled: true         # Model downloaded, enable offline TTS fallback
+  model_dir: "models/tts/kokoro-multi-lang-v1_0"
+  model_name: "model.onnx"
+  tokens_name: "tokens.txt"
+  voices_name: "voices.bin"
+  data_dir: "espeak-ng-data"   # phoneme data, inside model_dir
+  default_speaker: 0
+  default_speed: 1.0
+  timeout: 30
+
+# --- Offline ASR: Sherpa-ONNX Streaming Zipformer ---
+sherpa_asr:
+  enabled: true         # Model downloaded, enable offline ASR
+  model_dir: "models/asr/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20"
+  encoder_name: "encoder-epoch-99-avg-1.onnx"
+  decoder_name: "decoder-epoch-99-avg-1.onnx"
+  joiner_name: "joiner-epoch-99-avg-1.onnx"
+  tokens_name: "tokens.txt"
+  decoding_method: "greedy_search"
+  num_threads: 2
+  sample_rate: 16000
+
+# --- Offline KWS: Sherpa-ONNX Zipformer Keyword Spotting ---
+sherpa_kws:
+  enabled: true         # Model downloaded, enable offline KWS
+  model_dir: "models/kws/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01"
+  encoder_name: "encoder-epoch-99-avg-1-chunk-16-left-64.int8.onnx"
+  decoder_name: "decoder-epoch-99-avg-1-chunk-16-left-64.int8.onnx"
+  joiner_name: "joiner-epoch-99-avg-1-chunk-16-left-64.int8.onnx"
+  tokens_name: "tokens.txt"
+  keywords_file: "keywords.txt"
+  keywords: |
+    n ǐ h ǎo x iǎo zh ì @你好小智
+    x iǎo zh ì x iǎo zh ì @小智小智
+    x iǎo zh ì t óng x ué @小智同学
+    h uàn x ǐng x iǎo zh ì @唤醒小智
+    k āi sh ǐ l ù y īn @开始录音
+    t íng zh ǐ l ù y īn @停止录音
+  keywords_threshold: 0.2
+  keywords_score: 1.8
+  num_threads: 2
+  max_num_frames: 100   # ~1s of audio
+  sample_rate: 16000
+
+# --- VAD: Silero VAD (Voice Activity Detection for ASR) ---
+vad:
+  enabled: true         # Model downloaded, enable VAD
+  model_path: "models/vad/silero_vad.onnx"
+  threshold: 0.5
+  min_silence_duration_ms: 500
+  speech_pad_ms: 200
+
+# --- Routing Strategy ---
+routing:
+  tts:
+    primary: "edge_tts"
+    fallback: "sherpa_tts"
+    fallback_timeout: 10   # seconds before falling back
+  asr:
+    primary: "sherpa_asr"
+    fallback: null         # No online ASR in this service (Java backend handles that)
+  kws:
+    primary: "sherpa_kws"
+    fallback: null         # KWS always offline
+
+# --- CORS ---
+cors:
+  allow_origins: ["*"]
+  allow_methods: ["*"]
+  allow_headers: ["*"]

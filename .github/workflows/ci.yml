@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Syntax check (compile all Python sources)
+        run: |
+          python -m compileall app scripts
+          python -m compileall tests
+
+      - name: Import smoke test
+        run: |
+          # Verify app package imports without starting the server or loading models
+          python -c "import sys; sys.path.insert(0,'.'); from app.config import settings; from app.utils.logger import get_logger; print('app.config + logger: OK'); print('server.port =', settings.server.port)"
+
+      - name: Config YAML validity
+        run: |
+          python -c "import yaml; c=yaml.safe_load(open('config.yaml')); assert c['server']['port']==8090; print('config.yaml: OK, port=', c['server']['port'])"

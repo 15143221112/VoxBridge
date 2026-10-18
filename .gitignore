@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.so
+
+# 虚拟环境（必须排除，体积大）
+.venv/
+.venv_conda/
+venv/
+env/
+
+# 模型文件（必须排除，通过 scripts/download_models.py 按需下载）
+models/
+*.onnx
+*.bin
+
+# 日志
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 测试音频输出
+tests/*.mp3
+tests/*.wav
+!tests/*.mp3
